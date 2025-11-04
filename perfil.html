@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Perfil Médico</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 40px;
+      background: #ffffff;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input[type="text"], textarea, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+    input[type="file"] {
+      margin-top: 5px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #0078D4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005A9E;
+    }
+    .readonly {
+      background-color: #eee;
+    }
+    .imagen {
+      width: 20%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    #preview {
+      display: none;
+      margin-top: 10px;
+      max-width: 200px;
+      border-radius: 8px;
+    }
+    #btnCuestionario {
+      display: none;
+      margin: 20px auto;
+      background-color: #28a745;
+    }
+    #btnCuestionario:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <img src="logo.jfif" class="imagen">
+  <h1>Perfil Médico del Paciente</h1>
+
+  <form id="perfilForm">
+    <label>Nombre completo:</label>
+    <input type="text" id="nombre" readonly class="readonly">
+
+    <label>Número de Seguro Social:</label>
+    <input type="text" id="nss" readonly class="readonly">
+
+    <label>Fotografía actualizada:</label>
+    <input type="file" id="foto" accept="image/*">
+    <img id="preview">
+
+    <label>Grupo sanguíneo:</label>
+    <select id="sangre">
+      <option value="">Selecciona</option>
+      <option value="A+">A+</option>
+      <option value="A-">A-</option>
+      <option value="B+">B+</option>
+      <option value="B-">B-</option>
+      <option value="AB+">AB+</option>
+      <option value="AB-">AB-</option>
+      <option value="O+">O+</option>
+      <option value="O-">O-</option>
+    </select>
+
+    <label>Alergias:</label>
+    <textarea id="alergias" rows="2" placeholder="Ej. Penicilina, mariscos..."></textarea>
+
+    <label>Enfermedades crónicas:</label>
+    <textarea id="cronicas" rows="2" placeholder="Ej. Diabetes, hipertensión..."></textarea>
+
+    <label>Tratamiento médico actual:</label>
+    <textarea id="tratamiento" rows="2" placeholder="Ej. Metformina 850mg cada 12h..."></textarea>
+
+    <button type="button" onclick="guardarPerfil()">Guardar perfil</button>
+  </form>
+
+  <button id="btnCuestionario" onclick="irACuestionario()">Ir al Cuestionario</button>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const nss = params.get("nss");
+    const nombre = params.get("nombre");
+
+    document.getElementById("nss").value = nss || "";
+    document.getElementById("nombre").value = nombre || "";
+
+    const clave = "perfil_" + nss;
+    const datosGuardados = localStorage.getItem(clave);
+    const recienGuardado = localStorage.getItem("recienGuardado");
+
+    if (datosGuardados && recienGuardado !== "true") {
+      const datos = JSON.parse(datosGuardados);
+      document.getElementById("sangre").value = datos.sangre;
+      document.getElementById("alergias").value = datos.alergias;
+      document.getElementById("cronicas").value = datos.cronicas;
+      document.getElementById("tratamiento").value = datos.tratamiento;
+
+      document.getElementById("sangre").disabled = true;
+      document.getElementById("alergias").readOnly = true;
+      document.getElementById("cronicas").readOnly = true;
+      document.getElementById("tratamiento").readOnly = true;
+      document.getElementById("foto").disabled = true;
+
+      Swal.fire({
+        icon: 'info',
+        title: 'Perfil ya registrado',
+        text: 'Este perfil ya fue completado. Los datos no pueden modificarse.',
+        confirmButtonColor: '#3498db'
+      });
+
+      document.querySelector("button").disabled = true;
+    }
+
+    if (recienGuardado === "true") {
+      localStorage.removeItem("recienGuardado");
+      document.getElementById("btnCuestionario").style.display = "block";
+    }
+
+    function guardarPerfil() {
+      const sangre = document.getElementById("sangre").value;
+      const alergias = document.getElementById("alergias").value.trim();
+      const cronicas = document.getElementById("cronicas").value.trim();
+      const tratamiento = document.getElementById("tratamiento").value.trim();
+
+      if (!sangre || !alergias || !cronicas || !tratamiento) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campos incompletos',
+          text: 'Por favor completa todos los campos antes de guardar.',
+          confirmButtonColor: '#f39c12'
+        });
+        return;
+      }
+
+      const datos = { nombre, nss, sangre, alergias, cronicas, tratamiento };
+      localStorage.setItem(clave, JSON.stringify(datos));
+      localStorage.setItem("recienGuardado", "true");
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Perfil guardado',
+        text: 'La información médica ha sido registrada correctamente.',
+        confirmButtonColor: '#27ae60'
+      });
+
+      document.getElementById("btnCuestionario").style.display = "block";
+    }
+
+    function irACuestionario() {
+      const sangre = document.getElementById("sangre").value;
+      const alergias = encodeURIComponent(document.getElementById("alergias").value.trim());
+      const cronicas = encodeURIComponent(document.getElementById("cronicas").value.trim());
+      const tratamiento = encodeURIComponent(document.getElementById("tratamiento").value.trim());
+      const nombre = encodeURIComponent(document.getElementById("nombre").value.trim());
+      const nss = encodeURIComponent(document.getElementById("nss").value.trim());
+
+      const url = `https://690a567df444e05f5a5f9508--jocular-marzipan-fbf528.netlify.app/Cuestionario.html?nombre=${nombre}&nss=${nss}&sangre=${sangre}&alergias=${alergias}&cronicas=${cronicas}&tratamiento=${tratamiento}`;
+      window.location.href = url;
+    }
+
+    document.getElementById("foto").addEventListener("change", function(event) {
+      const file = event.target.files[0];
+      const preview = document.getElementById("preview");
+
+      if (file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.style.display = "none";
+        preview.src = "";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>QR a Ruta Local</title>
+  <style>
+    body {
+      margin: 40px;
+      padding: 0;
+      background: #ffffff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 20px;
+    }
+
+    .imagen {
+      width: 20%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #0078D4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #005A9E;
+    }
+
+    #qrcode {
+      margin-top: 20px;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    #enlaceQR {
+      display: none;
+      text-decoration: none;
+    }
+
+    #enlaceQR button {
+      margin-top: 10px;
+      background-color: #28a745;
+    }
+
+    #enlaceQR button:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <img src="logo.jfif" class="imagen">
+  <h1>Generador de citas</h1>
+  <button onclick="generarQR()">Generar QR</button>
+  <div id="qrcode"></div>
+
+  <a id="enlaceQR" href="#" target="_blank">
+    <button>Ir al enlace</button>
+  </a>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+  <script>
+    function generarQR() {
+      const enlace = "https://690a567df444e05f5a5f9508--jocular-marzipan-fbf528.netlify.app/alta.html";
+      const container = document.getElementById("qrcode");
+      container.innerHTML = "";
+
+      new QRCode(container, {
+        text: enlace,
+        width: 220,
+        height: 220,
+        colorDark: "#1a1a1a",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      const botonEnlace = document.getElementById("enlaceQR");
+      botonEnlace.href = enlace;
+      botonEnlace.style.display = "block";
+    }
+  </script>
+</body>
+</html>

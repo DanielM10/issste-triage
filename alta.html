@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Alta de Derechohabiente</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 40px;
+      background: #ffffff;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    fieldset {
+      margin: 20px auto;
+      max-width: 500px;
+      border: 1px solid #ccc;
+      padding: 20px;
+      background: #fff;
+      text-align: left;
+    }
+    legend {
+      font-weight: bold;
+      color: #0078D4;
+    }
+    label {
+      display: block;
+      margin: 12px 0 6px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #0078D4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005A9E;
+    }
+    #qrcode {
+      margin-top: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .imagen{
+    height:"10%"; 
+    width:"20%";
+   display: block; margin: auto;
+    }
+  </style>
+</head>
+<body>
+    <img src="logo.jfif" class="imagen" >
+  <h1>Alta de Derechohabiente</h1>
+
+  <form id="altaForm">
+    <fieldset>
+      <legend>Datos del paciente</legend>
+      <label for="nombre">Nombre completo:</label>
+      <input type="text" id="nombre" placeholder="Ej. Juan Pérez" required>
+
+      <label for="nss">Cedula:</label>
+      <input type="text" id="nss" placeholder="Ej. 12345678901" required>
+      
+      <button type="button" onclick="generarQR()">Generar QR</button>
+    </fieldset>
+  </form>
+  <button id="irPerfilBtn" type="button" onclick="irAlPerfil()" style="display:none;">Ir al perfil</button>
+
+  <div id="qrcode"></div>
+
+  <script>
+    function generarQR() {
+      const nombre = document.getElementById("nombre").value.trim();
+      const nss = document.getElementById("nss").value.trim();
+
+      if (!nombre || !nss || !/^\d{6,}$/.test(nss)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Datos inválidos',
+          text: 'Por favor ingresa un nombre y una cedula válida (mínimo 11 dígitos).',
+          confirmButtonColor: '#d33'
+        });
+        return;
+      }
+
+      const url = `https://690a567df444e05f5a5f9508--jocular-marzipan-fbf528.netlify.app/perfil.html?nss=${encodeURIComponent(nss)}&nombre=${encodeURIComponent(nombre)}`;
+
+      document.getElementById("qrcode").innerHTML = "";
+      new QRCode(document.getElementById("qrcode"), {
+        text: url,
+        width: 220,
+        height: 220,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      Swal.fire({
+        icon: 'success',
+        title: 'QR generado',
+        text: 'Este código QR enlaza al formulario de perfil del paciente.',
+        confirmButtonColor: '#27ae60'
+      });
+
+      // Mostrar el botón solo después de generar el QR
+      document.getElementById("irPerfilBtn").style.display = "inline-block";
+    }
+
+    function irAlPerfil() {
+      const nombre = document.getElementById("nombre").value.trim();
+      const nss = document.getElementById("nss").value.trim();
+
+      const url = `perfil.html?nss=${encodeURIComponent(nss)}&nombre=${encodeURIComponent(nombre)}`;
+      window.location.href = url;
+    }
+  </script>
+
+</body>
+</html>

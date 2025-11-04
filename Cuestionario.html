@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Evaluación de síntomas</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 40px;
+      background: #ffffff;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    fieldset {
+      margin-bottom: 30px;
+      border: 1px solid #ccc;
+      padding: 20px;
+      background: #fff;
+    }
+    legend {
+      font-weight: bold;
+      color: #0078D4;
+    }
+    label {
+      display: block;
+      margin: 8px 0;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      box-sizing: border-box;
+      background-color: #eee;
+    }
+    button {
+      display: block;
+      margin: 0 auto;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #0078D4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005A9E;
+    }
+    .imagen {
+      width: 20%;
+      height: auto;
+      display: block;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+  <img src="logo.jfif" class="imagen">
+  <h1>Evaluación de síntomas</h1>
+
+  <form id="triajeForm">
+    <fieldset>
+      <legend>Datos del paciente</legend>
+      <label>
+        Nombre completo:
+        <input type="text" id="nombre" readonly>
+      </label>
+      <label>
+        Cédula:
+        <input type="text" id="nss" readonly>
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Selecciona los síntomas que presentas</legend>
+
+      <!-- Mezcla manual de síntomas -->
+      <label><input type="checkbox" data-triaje="verde"> Diarrea, boca seca, vómito incontenible</label>
+      <label><input type="checkbox" data-triaje="rojo"> Heridas, fracturas o golpes múltiples/severos</label>
+      <label><input type="checkbox" data-triaje="amarillo"> Sangrado abundante</label>
+      <label><input type="checkbox" data-triaje="verde"> Reacción alérgica sin dificultad respiratoria</label>
+      <label><input type="checkbox" data-triaje="amarillo"> Envenenamiento por cualquier vía</label>
+      <label><input type="checkbox" data-triaje="rojo"> Dolor opresivo en pecho, estómago, mandíbula, cuello, brazo izquierdo, sudoración</label>
+      <label><input type="checkbox" data-triaje="verde"> Mayor de 70 años con síntomas agudos</label>
+      <label><input type="checkbox" data-triaje="amarillo"> Niño menor de 1 año con fiebre</label>
+      <label><input type="checkbox" data-triaje="rojo"> Pérdida de conocimiento o convulsión</label>
+      <label><input type="checkbox" data-triaje="verde"> Dolor reciente (&lt;12h), fiebre, taquicardia, mal estado general</label>
+      <label><input type="checkbox" data-triaje="amarillo"> Heridas que requieren puntos</label>
+      <label><input type="checkbox" data-triaje="verde"> Embarazada con síntomas no relacionados al embarazo</label>
+      <label><input type="checkbox" data-triaje="amarillo"> Alteraciones psiquiátricas agudas</label>
+      <label><input type="checkbox" data-triaje="rojo"> Dificultad para respirar, saturación menor a 80</label>
+      <label><input type="checkbox" data-triaje="verde"> Recién nacido con síntomas (sin fiebre)</label>
+      <label><input type="checkbox" data-triaje="amarillo"> Embarazada con fiebre o síntomas relacionados al embarazo</label>
+      <label><input type="checkbox" data-triaje="rojo"> Rostro caído, pérdida de fuerza, visión, equilibrio, habla</label>
+      <label><input type="checkbox" data-triaje="amarillo"> Dolor en el pecho con tensión alterada y dificultad respiratoria</label>
+      <label><input type="checkbox" data-triaje="verde"> Enfermedades crónicas con síntomas agudos</label>
+      <label><input type="checkbox" data-triaje="verde"> Niños de 1 a 5 años con fiebre y/o diarrea</label>
+
+    </fieldset>
+
+    <button type="button" onclick="clasificarTriaje()">Enviar</button>
+  </form>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const nombre = params.get("nombre") || "";
+    const nss = params.get("nss") || "";
+
+    document.getElementById("nombre").value = decodeURIComponent(nombre.replace(/\+/g, " "));
+    document.getElementById("nss").value = nss;
+
+    function guardarEnCookie(clasificacion) {
+      const nombre = document.getElementById("nombre").value.trim();
+      const nss = document.getElementById("nss").value.trim();
+
+      if (!nombre || !nss || !/^\d{11,}$/.test(nss)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Datos incompletos',
+          text: 'Por favor verifica que el nombre y NSS sean válidos.',
+          confirmButtonColor: '#d33'
+        });
+        return false;
+      }
+
+      const valor = JSON.stringify({ nombre, nss, clasificacion });
+      document.cookie = `triaje=${valor}; path=/; max-age=86400`;
+      return true;
+    }
+
+    function clasificarTriaje() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+      let rojo = 0, amarillo = 0, verde = 0;
+
+      checkboxes.forEach(cb => {
+        const tipo = cb.getAttribute('data-triaje');
+        if (tipo === 'rojo') rojo++;
+        else if (tipo === 'amarillo') amarillo++;
+        else if (tipo === 'verde') verde++;
+      });
+
+      let resultado = "";
+      let config = {};
+
+      if (rojo > 0) {
+        resultado = "atención inmediata";
+        config = {
+          icon: 'error',
+          title: '❗ Atención Inmediata',
+          html: 'Tu clasificación requiere atención médica urgente.<br>Presentarse inmediatamente a urgencias.',
+          confirmButtonColor: '#c0392b'
+        };
+      } else if (amarillo > 0) {
+        resultado = "atención urgente";
+        config = {
+          icon: 'warning',
+          title: '⚠️ Atención Urgente',
+          text: 'Tu clasificación requiere atención médica prioritaria.',
+          confirmButtonColor: '#f39c12'
+        };
+      } else if (verde > 0) {
+        resultado = "atención general";
+        config = {
+          icon: 'success',
+          title: '✅ Atención General',
+          html: 'Tu clasificación indica síntomas no graves.<br>Presentarse en primer nivel de atención.<br>Av.Orizaba S/N col.Obrero Campesino.',
+          confirmButtonColor: '#27ae60'
+        };
+      } else {
+        config = {
+          icon: 'info',
+          title: 'Sin síntomas detectados',
+          text: 'No se detectan síntomas suficientes para clasificar.',
+          confirmButtonColor: '#3498db'
+        };
+      }
+
+      if (guardarEnCookie(resultado)) {
+        Swal.fire(config);
+      }
+    }
+  </script>
+</body>
+</html>
