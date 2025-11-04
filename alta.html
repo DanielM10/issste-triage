@@ -87,7 +87,7 @@
       const nombre = document.getElementById("nombre").value.trim();
       const nss = document.getElementById("nss").value.trim();
 
-      if (!nombre || !nss || !/^\d{6,}$/.test(nss)) {
+      if (!nombre || !nss || nss.length <= 6) {
         Swal.fire({
           icon: 'error',
           title: 'Datos inválidos',
